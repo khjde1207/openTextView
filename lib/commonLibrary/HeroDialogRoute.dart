@@ -53,7 +53,6 @@ class HeroPopup {
                       )))))));
       // );
     })).then((completion) {
-      print("callback");
       if (this.callback != null) {
         this.callback(completion);
       }
@@ -91,9 +90,6 @@ class HeroDialogRoute<T> extends PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation, Widget child) {
-    // print('[[[[[[[[[[[[[[[[[[[]]]]]] ${animation}');
-    // return Text("1");
-
     return FadeTransition(
         opacity: new CurvedAnimation(parent: animation, curve: Curves.easeOut),
         child: child);

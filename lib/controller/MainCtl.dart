@@ -65,8 +65,12 @@ class MainCtl extends GetxController {
   }.obs;
 
   final imgFiles = [].obs;
+  final isScroll = false.obs;
 
   void onScroll() {
+    // 스크롤 중에 이동 방지
+    isScroll.update((val) => true);
+
     var min = itemPosListener.itemPositions.value
         .where((ItemPosition position) => position.itemTrailingEdge > 0)
         .reduce((ItemPosition min, ItemPosition position) =>
@@ -100,7 +104,10 @@ class MainCtl extends GetxController {
 
     AudioService.currentMediaItemStream.listen((event) {
       if (event?.extras != null) {
-        itemScrollctl.jumpTo(index: event.extras['pos'] as int);
+        if (!isScroll.value) {
+          itemScrollctl.jumpTo(
+              index: event.extras['pos'] as int, alignment: 0.1);
+        }
         curPos.value = event.extras['pos'];
         curPos.update((val) {});
       }
@@ -109,6 +116,13 @@ class MainCtl extends GetxController {
 
     itemPosListener.itemPositions.addListener(onScroll);
 
+    debounce(isScroll, (v) {
+      if (v) {
+        isScroll.update((val) {
+          return false;
+        });
+      }
+    }, time: Duration(milliseconds: 500));
     // 설정 이벤트
     ever(config['theme'], changeTheme);
     debounce(config['tts'], (ttsConf) async {
@@ -198,9 +212,10 @@ class MainCtl extends GetxController {
             if (whereIdx < 0) {
               history.add(
                   {'name': v['name'], 'pos': 0, 'date': formatter.format(now)});
-              itemScrollctl.jumpTo(index: 0);
+              itemScrollctl.jumpTo(index: 0, alignment: 0.1);
             } else {
-              itemScrollctl.jumpTo(index: history[whereIdx]['pos'] as int);
+              itemScrollctl.jumpTo(
+                  index: history[whereIdx]['pos'] as int, alignment: 0.1);
               history[whereIdx]['date'] = formatter.format(now);
             }
             itemPosListener.itemPositions.addListener(onScroll);
@@ -406,7 +421,7 @@ class MainCtl extends GetxController {
       });
       assignConfig(config ?? {});
       assignHistory(history ?? []);
-      itemScrollctl.jumpTo(index: history[whereIdx]['pos']);
+      itemScrollctl.jumpTo(index: history[whereIdx]['pos'], alignment: 0.1);
     } catch (e) {}
   }
 
@@ -438,7 +453,6 @@ class MainCtl extends GetxController {
     int c1 = v[0];
     int c2 = v[1];
 
-    print('changeThemechangeThemechangeThemechangeTheme ${v}');
     Color color1 = Color(c1);
     Color color2 = Color(c2);
     Get.changeTheme(ThemeData(

@@ -40,7 +40,6 @@ class Option_FilePicker extends OptionsBase {
   }
 
   bReadyOcr() async {
-    print(await FlutterBackground.hasPermissions);
     if (await FlutterBackground.hasPermissions) {
       bool rtn = false;
       Directory dir = Directory(await FlutterTesseractOcr.getTessdataPath());

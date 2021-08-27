@@ -145,7 +145,6 @@ class Option_Theme extends OptionsBase {
                                     onPressed: () {
                                       controller.config.update('theme',
                                           (value) {
-                                        print(e);
                                         RxList list = value;
                                         list.assignAll([e[0], e[1]]);
                                         return value;

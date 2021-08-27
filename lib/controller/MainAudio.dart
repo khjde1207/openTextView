@@ -20,7 +20,7 @@ class TextPlayerTask extends BackgroundAudioTask {
   Map<String, dynamic> params;
 
   bool get _playing => AudioServiceBackground.state.playing;
-
+  bool listenPlaying = false;
   List filterList;
   // final ctl = Get.find<MainCtl>();
 
@@ -37,8 +37,10 @@ class TextPlayerTask extends BackgroundAudioTask {
     session.interruptionEventStream.listen((event) {
       if (event.type == AudioInterruptionType.pause) {
         if (event.begin) {
+          bool laststat = _playing;
           onPause();
-        } else {
+          listenPlaying = laststat;
+        } else if (listenPlaying == true) {
           onPlay();
         }
         return;
@@ -63,43 +65,6 @@ class TextPlayerTask extends BackgroundAudioTask {
         .where((element) => element['enable'])
         .toList();
 
-    // flutter_tts resets the AVAudioSession category to playAndRecord and the
-    // options to defaultToSpeaker whenever this background isolate is loaded,
-    // so we need to set our preferred audio session configuration here after
-    // that has happened.
-    // final session = await AudioSession.instance;
-    // await session.configure(AudioSessionConfiguration.speech());
-    // Handle audio interruptions.
-    // session.interruptionEventStream.listen((event) {
-    //   print('event.begin : ${event.begin}');
-    //   print('event.type : ${event.type}');
-
-    //   if (event.begin) {
-    //     if (_playing) {
-    //       onPause();
-    //       _interrupted = true;
-    //     }
-    //   } else {
-    //     switch (event.type) {
-    //       case AudioInterruptionType.pause:
-    //       case AudioInterruptionType.duck:
-    //         if (!_playing && _interrupted) {
-    //           onPlay();
-    //         }
-    //         break;
-    //       case AudioInterruptionType.unknown:
-    //         break;
-    //     }
-    //     _interrupted = false;
-    //   }
-    // });
-    // Handle unplugged headphones.
-    // session.becomingNoisyEventStream.listen((_) {
-    //   if (_playing) onPause();
-    // });
-
-    // _completer.complete();
-    // super.onStart(params);
     return;
   }
 
@@ -127,6 +92,7 @@ class TextPlayerTask extends BackgroundAudioTask {
     if (!await session.setActive(true)) {
       return;
     }
+
     // if (await session.setActive(true)) {
     //   // Now play audio.
     // } else {
@@ -140,7 +106,7 @@ class TextPlayerTask extends BackgroundAudioTask {
       playing: true,
       processingState: AudioProcessingState.buffering,
     );
-
+    listenPlaying = true;
     // tts start
     Map ttsConf = params['tts'];
 
@@ -187,6 +153,7 @@ class TextPlayerTask extends BackgroundAudioTask {
     }
 
     onStop();
+
     return super.onPlay();
   }
 
@@ -225,6 +192,7 @@ class TextPlayerTask extends BackgroundAudioTask {
       MediaControl.stop,
     ], playing: false, processingState: AudioProcessingState.ready);
     tts.stop();
+    listenPlaying = false;
   }
 
   @override
@@ -235,6 +203,7 @@ class TextPlayerTask extends BackgroundAudioTask {
         playing: false,
         processingState: AudioProcessingState.none);
     tts.stop();
+    listenPlaying = false;
     super.onStop();
     // super.cacheManager.emptyCache();
     // Signal the speech to stop

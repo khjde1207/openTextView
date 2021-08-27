@@ -79,7 +79,7 @@ class Option_History extends OptionsBase {
                                 background: Container(color: Colors.red),
                                 onDismissed: (direction) {
                                   // e.deleteSync(recursive: true);
-                                  print("idxidx  : ${idx}");
+
                                   ctl.history.removeAt(idx);
                                   ctl.update();
                                   return ctl.history;

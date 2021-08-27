@@ -76,7 +76,6 @@ class Option_Tts extends OptionsBase {
                                     .toPrecision(2)
                                     .toString(),
                                 onChanged: (double v) {
-                                  print('vvv : ${v.toPrecision(2)}');
                                   (controller.config['tts']
                                       as Map)['speechRate'] = v.toPrecision(2);
 
